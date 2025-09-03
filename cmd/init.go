@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
+	ini "gopkg.in/ini.v1"
 	"petezalew.ski/pit/model"
 )
 
@@ -81,6 +82,21 @@ func initRepository(cmd *cobra.Command, args []string) {
 	}
 	defer head.Close()
 	head.WriteString(DefaultHead)
+
+	config := ini.Empty()
+	core := config.Section("core")
+	core.Key("repositoryformatversion").SetValue("0")
+	core.Key("filemode").SetValue("false")
+	core.Key("bare").SetValue("false")
+
+	c, err := os.OpenFile(repo.GitPath("config"), os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer c.Close()
+
+	config.WriteToIndent(c, "        ")
 
 	fmt.Println(repo)
 }
