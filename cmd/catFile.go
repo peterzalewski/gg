@@ -15,8 +15,7 @@ var catFileCmd = &cobra.Command{
 }
 
 func catFile(cmd *cobra.Command, args []string) {
-	worktree := "."
-	repo, err := model.NewRepository(worktree)
+	repo, err := model.NewRepository(model.WithDiscoverRoot())
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

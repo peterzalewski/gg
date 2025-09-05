@@ -12,20 +12,65 @@ type Repository struct {
 }
 
 var ErrWorktreeMustBeDir = errors.New("worktree must be a directory")
+var ErrNotAGitRepository = errors.New("not a git repository")
 
-func NewRepository(worktree string) (*Repository, error) {
-	s, err := os.Stat(worktree)
-	if err != nil {
-		return nil, err
+type RepositoryOption func(*Repository) error
+
+func WithDiscoverRoot() RepositoryOption {
+	return func(r *Repository) error {
+		worktree, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+
+		for {
+			gitDirectory := path.Join(worktree, ".git")
+
+			s, err := os.Stat(gitDirectory)
+			if err == nil && s.IsDir() {
+				r.Worktree = worktree
+				r.GitDirectory = gitDirectory
+				return nil
+			}
+
+			if worktree == "/" {
+				return ErrNotAGitRepository
+			}
+
+			worktree = path.Dir(worktree)
+		}
 	}
-	if !s.IsDir() {
-		return nil, ErrWorktreeMustBeDir
+}
+
+func WithRoot(worktree string) RepositoryOption {
+	return func(r *Repository) error {
+		s, err := os.Stat(worktree)
+		if err != nil {
+			return err
+		}
+
+		if !s.IsDir() {
+			return ErrWorktreeMustBeDir
+		}
+
+		r.GitDirectory = path.Join(worktree, ".git")
+		r.Worktree = worktree
+
+		return nil
+	}
+}
+
+func NewRepository(options ...RepositoryOption) (*Repository, error) {
+	r := &Repository{}
+
+	for _, option := range options {
+		err := option(r)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &Repository{
-		GitDirectory: path.Join(worktree, ".git"),
-		Worktree:     worktree,
-	}, nil
+	return r, nil
 }
 
 func (r Repository) GitPath(elem ...string) string {

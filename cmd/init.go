@@ -29,7 +29,7 @@ func initRepository(cmd *cobra.Command, args []string) {
 		worktree = args[0]
 	}
 
-	repo, err := model.NewRepository(worktree)
+	repo, err := model.NewRepository(model.WithRoot(worktree))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
