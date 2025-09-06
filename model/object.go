@@ -53,13 +53,13 @@ func (r Repository) ReadObject(hash string) (interface{}, error) {
 
 	switch base.Type {
 	case "blob":
-		return &Blob{Object: base}, nil
+		return NewBlob(base), nil
 	case "commit":
-		return &Commit{Object: base}, nil
+		return NewCommit(base), nil
 	case "tag":
-		return &Tag{Object: base}, nil
+		return NewTag(base), nil
 	case "tree":
-		return &Tree{Object: base}, nil
+		return NewTree(base), nil
 	default:
 		return nil, ErrInvalidObject
 	}

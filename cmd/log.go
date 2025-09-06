@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"petezalew.ski/pit/model"
@@ -43,20 +42,11 @@ func log(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		message := commit.Message()
-		newlineIndex := strings.Index(message, "\n")
-		var firstLine string
-		if newlineIndex == -1 {
-			firstLine = message
-		} else {
-			firstLine = message[:newlineIndex]
-		}
-		fmt.Printf("*  %s | %s [%s]\n", hash[:7], firstLine, commit.Authors())
+		fmt.Printf("*  %s | %s [%s]\n", hash[:7], commit.FirstLine(), commit.Authors)
 
-		parents := commit.Parents()
-		if len(parents) == 0 {
+		if len(commit.Parents) == 0 {
 			break
 		}
-		hash = parents[0]
+		hash = commit.Parents[0]
 	}
 }

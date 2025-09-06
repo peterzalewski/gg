@@ -8,6 +8,10 @@ import (
 
 type Commit struct {
 	*Object
+	Authors []string
+	Parents []string
+	Tree    string
+	Message string
 }
 
 var (
@@ -17,45 +21,52 @@ var (
 	messageRe = regexp.MustCompile(`(?s)\n\n(?P<message>.+)$`)
 )
 
-func (c *Commit) Authors() []string {
-	authors := make([]string, 0)
+func NewCommit(obj *Object) *Commit {
+	c := &Commit{Object: obj}
+	c.Authors = make([]string, 0)
+
 	for _, match := range authorRe.FindAllStringSubmatch(c.Contents, -1) {
-		authors = append(authors, match[authorRe.SubexpIndex("author")])
+		c.Authors = append(c.Authors, match[authorRe.SubexpIndex("author")])
 	}
-	return authors
-}
 
-func (c *Commit) Parents() []string {
-	parents := make([]string, 0)
+	c.Parents = make([]string, 0)
 	for _, match := range parentRe.FindAllStringSubmatch(c.Contents, -1) {
-		parents = append(parents, match[parentRe.SubexpIndex("hash")])
+		c.Parents = append(c.Parents, match[parentRe.SubexpIndex("hash")])
 	}
-	return parents
-}
 
-func (c *Commit) Tree() string {
 	match := treeRe.FindStringSubmatch(c.Contents)
-	return match[treeRe.SubexpIndex("hash")]
+	c.Tree = match[treeRe.SubexpIndex("hash")]
+
+	match = messageRe.FindStringSubmatch(c.Contents)
+	c.Message = match[messageRe.SubexpIndex("message")]
+
+	return c
 }
 
-func (c *Commit) Message() string {
-	match := messageRe.FindStringSubmatch(c.Contents)
-	return match[messageRe.SubexpIndex("message")]
+func (c *Commit) FirstLine() string {
+	newlineIndex := strings.Index(c.Message, "\n")
+	var firstLine string
+	if newlineIndex == -1 {
+		firstLine = c.Message
+	} else {
+		firstLine = c.Message[:newlineIndex]
+	}
+	return firstLine
 }
 
 func (c *Commit) String() string {
 	var build strings.Builder
 
-	for _, author := range c.Authors() {
+	for _, author := range c.Authors {
 		build.WriteString(fmt.Sprintf("Author: %s\n", author))
 	}
 
-	for _, parent := range c.Parents() {
+	for _, parent := range c.Parents {
 		build.WriteString(fmt.Sprintf("Parent: %s\n", parent))
 	}
 
-	build.WriteString(fmt.Sprintf("Tree: %s\n", c.Tree()))
-	build.WriteString(fmt.Sprintf("Message: %s", c.Message()))
+	build.WriteString(fmt.Sprintf("Tree: %s\n", c.Tree))
+	build.WriteString(fmt.Sprintf("Message: %s", c.Message))
 
 	return build.String()
 }
