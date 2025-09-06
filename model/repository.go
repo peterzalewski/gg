@@ -2,8 +2,11 @@ package model
 
 import (
 	"errors"
+	"io"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 )
 
 type Repository struct {
@@ -13,6 +16,7 @@ type Repository struct {
 
 var ErrWorktreeMustBeDir = errors.New("worktree must be a directory")
 var ErrNotAGitRepository = errors.New("not a git repository")
+var indirectRefRe = regexp.MustCompile(`^ref: (?P<indirectRef>[^\n]+)`)
 
 type RepositoryOption func(*Repository) error
 
@@ -76,4 +80,22 @@ func NewRepository(options ...RepositoryOption) (*Repository, error) {
 func (r Repository) GitPath(elem ...string) string {
 	foo := append([]string{r.GitDirectory}, elem...)
 	return path.Join(foo...)
+}
+
+func (r Repository) ResolveRef(filename string) string {
+	for {
+		path := r.GitPath(filename)
+		file, err := os.Open(path)
+		if err != nil {
+			panic("uh oh")
+		}
+		defer file.Close()
+		contents, _ := io.ReadAll(file)
+		if match := indirectRefRe.FindSubmatch(contents); match != nil {
+			filename = string(match[indirectRefRe.SubexpIndex("indirectRef")])
+			continue
+		}
+
+		return strings.TrimSpace(string(contents))
+	}
 }

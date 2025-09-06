@@ -11,8 +11,9 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(catFileCmd)
+	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(logCmd)
 }
 
 func Execute() error {
