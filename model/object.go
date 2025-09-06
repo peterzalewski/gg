@@ -10,19 +10,19 @@ import (
 )
 
 type Object struct {
-	hash     string
-	oType    string
-	size     int
-	contents string
+	Hash     string
+	Type     string
+	Size     int
+	Contents string
 }
 
 func (o Object) String() string {
-	return o.contents
+	return o.Contents
 }
 
 var ErrInvalidObject = errors.New("invalid git object")
 
-func (r Repository) ReadObject(hash string) (*Object, error) {
+func (r Repository) ReadObject(hash string) (interface{}, error) {
 	path := r.GitPath("objects", hash[:2], hash[2:])
 
 	file, err := os.Open(path)
@@ -44,10 +44,23 @@ func (r Repository) ReadObject(hash string) (*Object, error) {
 		return nil, ErrInvalidObject
 	}
 
-	return &Object{
-		hash:     hash,
-		size:     size,
-		oType:    string(contents[0:typeEnd]),
-		contents: string(contents[headerEnd+1:]),
-	}, nil
+	base := &Object{
+		Hash:     hash,
+		Size:     size,
+		Type:     string(contents[0:typeEnd]),
+		Contents: string(contents[headerEnd+1:]),
+	}
+
+	switch base.Type {
+	case "blob":
+		return &Blob{Object: base}, nil
+	case "commit":
+		return &Commit{Object: base}, nil
+	case "tag":
+		return &Tag{Object: base}, nil
+	case "tree":
+		return &Tree{Object: base}, nil
+	default:
+		return nil, ErrInvalidObject
+	}
 }
