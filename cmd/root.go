@@ -14,6 +14,7 @@ func init() {
 	rootCmd.AddCommand(catFileCmd)
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(logCmd)
+	rootCmd.AddCommand(lsTreeCmd)
 }
 
 func Execute() error {
