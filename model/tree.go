@@ -19,7 +19,7 @@ type TreeEntry struct {
 }
 
 var (
-	treeEntryRe = regexp.MustCompile(`(?m)(?P<mode>[0-9]{6}) (?P<filename>[^\x00]+)\x00(?P<hash>.{20})`)
+	treeEntryRe = regexp.MustCompile(`(?m)(?P<mode>[0-9]{5,6}) (?P<filename>[^\x00]+)\x00(?P<hash>.{20})`)
 )
 
 // TODO: I'm not convinced regex is the way to go here but it's always the first tool I reach for and here we are
