@@ -48,16 +48,16 @@ func WithDiscoverRoot() RepositoryOption {
 
 func WithRoot(worktree string) RepositoryOption {
 	return func(r *Repository) error {
-		s, err := os.Stat(worktree)
-		if err != nil {
-			return err
-		}
-
-		if !s.IsDir() {
+		if wt, err := os.Stat(worktree); err != nil || !wt.IsDir() {
 			return ErrWorktreeMustBeDir
 		}
 
-		r.GitDirectory = path.Join(worktree, ".git")
+		gitDirectory := path.Join(worktree, ".git")
+		if gd, err := os.Stat(gitDirectory); err != nil || !gd.IsDir() {
+			return ErrNotAGitRepository
+		}
+
+		r.GitDirectory = gitDirectory
 		r.Worktree = worktree
 
 		return nil
