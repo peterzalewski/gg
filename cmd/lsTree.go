@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 
 	"github.com/spf13/cobra"
@@ -13,14 +12,13 @@ var hashRe = regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
 var lsTreeCmd = &cobra.Command{
 	Use:   "ls-tree",
 	Short: "List the contents of a tree object",
-	Run:   lsTree,
+	RunE:  lsTree,
 }
 
-func lsTree(cmd *cobra.Command, args []string) {
-	repo, err := model.NewRepository(model.WithDiscoverRoot())
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func lsTree(cmd *cobra.Command, args []string) error {
+	repo, ok := cmd.Context().Value(model.Repository{}).(*model.Repository)
+	if !ok {
+		return fmt.Errorf("could not retrieve repo from context")
 	}
 
 	var ref string
@@ -36,8 +34,7 @@ func lsTree(cmd *cobra.Command, args []string) {
 
 	o, err := repo.ReadObject(ref)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	var tree *model.Tree
@@ -49,9 +46,9 @@ func lsTree(cmd *cobra.Command, args []string) {
 	case *model.Tree:
 		tree = o
 	default:
-		fmt.Println("invalid object type")
-		os.Exit(1)
+		return fmt.Errorf("invalid object type")
 	}
 
 	fmt.Println(tree)
+	return nil
 }

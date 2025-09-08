@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	"petezalew.ski/pit/model"
@@ -11,14 +10,13 @@ import (
 var logCmd = &cobra.Command{
 	Use:   "log",
 	Short: "Show commit logs",
-	Run:   log,
+	RunE:  log,
 }
 
-func log(cmd *cobra.Command, args []string) {
-	repo, err := model.NewRepository(model.WithDiscoverRoot())
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func log(cmd *cobra.Command, args []string) error {
+	repo, ok := cmd.Context().Value(model.Repository{}).(*model.Repository)
+	if !ok {
+		return fmt.Errorf("could not retrieve repo from context")
 	}
 
 	var ref string
@@ -32,14 +30,12 @@ func log(cmd *cobra.Command, args []string) {
 	for {
 		o, err := repo.ReadObject(hash)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return err
 		}
 
 		commit, isCommit := o.(*model.Commit)
 		if !isCommit {
-			fmt.Printf("read something that isn't a commit: %s\n", hash)
-			os.Exit(1)
+			return fmt.Errorf("read something that isn't a commit: %s\n", hash)
 		}
 
 		fmt.Printf("*  %s | %s [%s]\n", hash[:7], commit.FirstLine(), commit.Authors)
@@ -49,4 +45,6 @@ func log(cmd *cobra.Command, args []string) {
 		}
 		hash = commit.Parents[0]
 	}
+
+	return nil
 }
