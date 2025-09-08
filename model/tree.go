@@ -1,9 +1,9 @@
 package model
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -18,22 +18,35 @@ type TreeEntry struct {
 	Blob     string
 }
 
-var (
-	treeEntryRe = regexp.MustCompile(`(?m)(?P<mode>[0-9]{5,6}) (?P<filename>[^\x00]+)\x00(?P<hash>.{20})`)
-)
-
-// TODO: I'm not convinced regex is the way to go here but it's always the first tool I reach for and here we are
 func NewTree(obj *Object) *Tree {
 	tree := &Tree{Object: obj}
 	tree.Entries = make([]TreeEntry, 0)
-	for _, match := range treeEntryRe.FindAllSubmatch([]byte(obj.Contents), -1) {
+	data := []byte(tree.Contents)
+
+	var spaceIndex, nulIndex, hashIndex int
+	for len(data) > 0 {
+		spaceIndex = bytes.IndexByte(data, ' ')
+		if spaceIndex == -1 {
+			break
+		}
+		mode := string(data[:spaceIndex])
+
+		nulIndex = bytes.IndexByte(data, 0)
+		if nulIndex == -1 {
+			break
+		}
+		fileName := string(data[spaceIndex+1 : nulIndex])
+		hashIndex = nulIndex + 1
+
 		tree.Entries = append(tree.Entries, TreeEntry{
-			Mode:     string(match[treeEntryRe.SubexpIndex("mode")]),
-			FileName: string(match[treeEntryRe.SubexpIndex("filename")]),
-			// TODO: Figure out why this matches 21 bytes instead of 20 on all but the first match
-			Blob: hex.EncodeToString(match[treeEntryRe.SubexpIndex("hash")][:20]),
+			Mode:     mode,
+			FileName: fileName,
+			Blob:     hex.EncodeToString(data[hashIndex : hashIndex+20]),
 		})
+
+		data = data[hashIndex+20:]
 	}
+
 	return tree
 }
 

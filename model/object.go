@@ -13,11 +13,11 @@ type Object struct {
 	Hash     string
 	Type     string
 	Size     int
-	Contents string
+	Contents []byte
 }
 
 func (o Object) String() string {
-	return o.Contents
+	return string(o.Contents)
 }
 
 type GitObject interface {
@@ -52,7 +52,7 @@ func (r Repository) ReadObject(hash string) (GitObject, error) {
 		Hash:     hash,
 		Size:     size,
 		Type:     string(contents[0:typeEnd]),
-		Contents: string(contents[headerEnd+1:]),
+		Contents: contents[headerEnd+1:],
 	}
 
 	switch base.Type {

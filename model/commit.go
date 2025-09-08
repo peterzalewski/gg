@@ -25,20 +25,20 @@ func NewCommit(obj *Object) *Commit {
 	c := &Commit{Object: obj}
 	c.Authors = make([]string, 0)
 
-	for _, match := range authorRe.FindAllStringSubmatch(c.Contents, -1) {
-		c.Authors = append(c.Authors, match[authorRe.SubexpIndex("author")])
+	for _, match := range authorRe.FindAllSubmatch(c.Contents, -1) {
+		c.Authors = append(c.Authors, string(match[authorRe.SubexpIndex("author")]))
 	}
 
 	c.Parents = make([]string, 0)
-	for _, match := range parentRe.FindAllStringSubmatch(c.Contents, -1) {
-		c.Parents = append(c.Parents, match[parentRe.SubexpIndex("hash")])
+	for _, match := range parentRe.FindAllSubmatch(c.Contents, -1) {
+		c.Parents = append(c.Parents, string(match[parentRe.SubexpIndex("hash")]))
 	}
 
-	match := treeRe.FindStringSubmatch(c.Contents)
-	c.Tree = match[treeRe.SubexpIndex("hash")]
+	match := treeRe.FindSubmatch(c.Contents)
+	c.Tree = string(match[treeRe.SubexpIndex("hash")])
 
-	match = messageRe.FindStringSubmatch(c.Contents)
-	c.Message = match[messageRe.SubexpIndex("message")]
+	match = messageRe.FindSubmatch(c.Contents)
+	c.Message = string(match[messageRe.SubexpIndex("message")])
 
 	return c
 }
