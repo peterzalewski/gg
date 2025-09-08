@@ -20,9 +20,13 @@ func (o Object) String() string {
 	return o.Contents
 }
 
+type GitObject interface {
+	ObjectType() string
+}
+
 var ErrInvalidObject = errors.New("invalid git object")
 
-func (r Repository) ReadObject(hash string) (interface{}, error) {
+func (r Repository) ReadObject(hash string) (GitObject, error) {
 	path := r.GitPath("objects", hash[:2], hash[2:])
 
 	file, err := os.Open(path)

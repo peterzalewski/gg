@@ -43,6 +43,10 @@ func NewCommit(obj *Object) *Commit {
 	return c
 }
 
+func (c *Commit) ObjectType() string {
+	return "commit"
+}
+
 func (c *Commit) FirstLine() string {
 	newlineIndex := strings.Index(c.Message, "\n")
 	var firstLine string

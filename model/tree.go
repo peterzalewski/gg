@@ -37,6 +37,10 @@ func NewTree(obj *Object) *Tree {
 	return tree
 }
 
+func (t *Tree) ObjectType() string {
+	return "tree"
+}
+
 func (t *Tree) String() string {
 	var build strings.Builder
 
