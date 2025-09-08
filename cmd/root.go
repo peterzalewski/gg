@@ -12,6 +12,8 @@ var rootCmd = &cobra.Command{
 	Short: "Do what git does in Go",
 	Long:  "This is a toy version of git and a way to get familiar and comfortable with Go.",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
+
 		// TODO: bail if init?
 		var rootOption model.RepositoryOption
 		if workTree, err := cmd.Flags().GetString("work-tree"); err == nil {
