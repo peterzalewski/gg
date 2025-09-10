@@ -41,6 +41,7 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(logCmd)
 	rootCmd.AddCommand(lsTreeCmd)
+	rootCmd.AddCommand(statusCmd)
 }
 
 func Execute() error {
