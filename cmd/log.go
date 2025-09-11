@@ -26,7 +26,11 @@ func log(cmd *cobra.Command, args []string) error {
 		ref = args[0]
 	}
 
-	hash := repo.ResolveRef(ref)
+	hash, err := repo.ResolveRef(ref)
+	if err != nil {
+		return err
+	}
+
 	for {
 		o, err := repo.ReadObject(hash)
 		if err != nil {

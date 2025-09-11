@@ -58,8 +58,9 @@ func lsTree(cmd *cobra.Command, args []string) error {
 		ref = args[0]
 	}
 
-	if !hashRe.MatchString(ref) {
-		ref = repo.ResolveRef(ref)
+	ref, err := repo.ResolveRef(ref)
+	if err != nil {
+		return err
 	}
 
 	o, err := repo.ReadObject(ref)

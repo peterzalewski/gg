@@ -16,7 +16,9 @@ type Repository struct {
 
 var ErrWorktreeMustBeDir = errors.New("worktree must be a directory")
 var ErrNotAGitRepository = errors.New("not a git repository")
+var ErrBadRevision = errors.New("bad revision")
 var indirectRefRe = regexp.MustCompile(`^ref: (?P<indirectRef>[^\n]+)`)
+var hashRe = regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
 
 type RepositoryOption func(*Repository) error
 
@@ -82,20 +84,33 @@ func (r Repository) GitPath(elem ...string) string {
 	return path.Join(foo...)
 }
 
-func (r Repository) ResolveRef(filename string) string {
-	for {
-		path := r.GitPath(filename)
-		file, err := os.Open(path)
+func (r Repository) ResolveRef(filename string) (string, error) {
+	// If it looks like a full SHA1, check it exists and, if it does,
+	// we'll lazily assume it's a commit and return it
+	if hashRe.MatchString(filename) {
+		path := r.GitPath("objects", filename[:2], filename[2:])
+		_, err := os.Stat(path)
 		if err != nil {
-			panic("uh oh")
-		}
-		defer file.Close()
-		contents, _ := io.ReadAll(file)
-		if match := indirectRefRe.FindSubmatch(contents); match != nil {
-			filename = string(match[indirectRefRe.SubexpIndex("indirectRef")])
-			continue
+			return "", err
 		}
 
-		return strings.TrimSpace(string(contents))
+		return filename, nil
 	}
+
+	// Otherwise, try to open it and see if it's an indirect reference
+	// `ref: refs/heads/blah` or a SHA
+	path := r.GitPath(filename)
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	contents, _ := io.ReadAll(file)
+	if match := indirectRefRe.FindSubmatch(contents); match != nil {
+		filename = string(match[indirectRefRe.SubexpIndex("indirectRef")])
+		return r.ResolveRef(filename)
+	}
+
+	return r.ResolveRef(strings.TrimSpace(string(contents)))
 }
