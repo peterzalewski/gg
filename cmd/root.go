@@ -35,13 +35,11 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringP("work-tree", "C", ".", "Run as if pit was started in this path instead of the current working directory.")
 
-	lsTreeCmd.Flags().BoolP("recursive", "r", false, "recurse into sub-trees")
-
-	rootCmd.AddCommand(catFileCmd)
-	rootCmd.AddCommand(initCmd)
-	rootCmd.AddCommand(logCmd)
-	rootCmd.AddCommand(lsTreeCmd)
-	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(NewCatFileCmd())
+	rootCmd.AddCommand(NewInitCmd())
+	rootCmd.AddCommand(NewLogCmd())
+	rootCmd.AddCommand(NewLSTreeCmd())
+	rootCmd.AddCommand(NewStatusCmd())
 }
 
 func Execute() error {
