@@ -114,3 +114,23 @@ func (r Repository) ResolveRef(filename string) (string, error) {
 
 	return r.ResolveRef(strings.TrimSpace(string(contents)))
 }
+
+func (r Repository) CurrentBranch() (string, error) {
+	head := r.GitPath("HEAD")
+	file, err := os.Open(head)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	contents, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+
+	if match := indirectRefRe.FindStringSubmatch(string(contents)); match != nil {
+		return match[indirectRefRe.SubexpIndex("indirectRef")][11:], nil
+	}
+
+	return string(contents), nil
+}

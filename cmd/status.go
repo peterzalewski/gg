@@ -31,6 +31,13 @@ func NewStatusCmd() *cobra.Command {
 			}
 
 			var builder strings.Builder
+
+			current, err := repo.CurrentBranch()
+			if err != nil {
+				return err
+			}
+
+			builder.WriteString(fmt.Sprintf("On branch %s\n", current))
 			for _, entry := range status.Entries {
 				builder.WriteString(fmt.Sprintf("%s %s\n", entry.Hash, entry.FileName))
 			}
