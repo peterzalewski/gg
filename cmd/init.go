@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"syscall"
@@ -9,6 +10,9 @@ import (
 	ini "gopkg.in/ini.v1"
 	"petezalew.ski/pit/model"
 )
+
+var ErrGitExistsAndIsNotDir = errors.New(".git exists and is not a directory")
+var ErrGitDirExistsAndIsNotEmpty = errors.New(".git exists and is not empty")
 
 const (
 	DefaultDescription = "Unnamed repository; edit this file 'description' to name the repository.\n"
@@ -38,44 +42,37 @@ func NewInitCmd() *cobra.Command {
 			if err != nil {
 				// .git doesn't exist, so create it
 				if err := os.Mkdir(repo.GitDirectory, 0755); err != nil {
-					fmt.Println(err)
-					os.Exit(1)
+					return err
 				}
 			} else if !s.IsDir() {
 				// .git exists but it's a file; abort
-				fmt.Println(".git exists and is not a directory")
-				os.Exit(1)
+				return ErrGitExistsAndIsNotDir
 			} else {
 				// .git is a directory...
 				if ls, err := os.ReadDir(repo.GitDirectory); err != nil {
-					fmt.Println(err)
-					os.Exit(1)
+					return err
 				} else if len(ls) > 0 {
 					// ...but it's not empty; abort
-					fmt.Println(".git exists and is not empty")
-					os.Exit(1)
+					return ErrGitDirExistsAndIsNotEmpty
 				}
 			}
 
 			for _, dir := range []string{"branches", "objects", "refs/tags", "refs/heads"} {
 				if err := os.MkdirAll(repo.GitPath(dir), 0755); err != nil {
-					fmt.Println(err)
-					os.Exit(1)
+					return err
 				}
 			}
 
 			description, err := os.OpenFile(repo.GitPath("description"), os.O_RDWR|os.O_CREATE, 0644)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				return err
 			}
 			defer description.Close()
 			description.WriteString(DefaultDescription)
 
 			head, err := os.OpenFile(repo.GitPath("HEAD"), os.O_RDWR|os.O_CREATE, 0644)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				return err
 			}
 			defer head.Close()
 			head.WriteString(DefaultHead)
@@ -88,8 +85,7 @@ func NewInitCmd() *cobra.Command {
 
 			c, err := os.OpenFile(repo.GitPath("config"), os.O_RDWR|os.O_CREATE, 0644)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				return err
 			}
 			defer c.Close()
 

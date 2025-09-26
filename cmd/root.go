@@ -14,7 +14,10 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		cmd.SilenceUsage = true
 
-		// TODO: bail if init?
+		if cmd.Name() == "init" {
+			return nil
+		}
+
 		var rootOption model.RepositoryOption
 		if workTree, err := cmd.Flags().GetString("work-tree"); err == nil {
 			rootOption = model.WithRoot(workTree)
