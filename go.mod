@@ -1,4 +1,4 @@
-module petezalew.ski/pit
+module petezalew.ski/gg
 
 go 1.25.0
 

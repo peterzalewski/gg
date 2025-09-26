@@ -1,9 +1,9 @@
-# CRUSH.md - Development Guide for pit
+# CRUSH.md - Development Guide for gg
 
 ## Build/Test/Lint Commands
 ```bash
 # Build the project
-go build -o pit .
+go build -o gg .
 
 # Run all tests
 go test ./...
@@ -22,7 +22,7 @@ go fmt ./...
 go vet ./...
 
 # Run the built binary
-./pit --help
+./gg --help
 ```
 
 ## Code Style Guidelines

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"petezalew.ski/pit/cmd"
+	"petezalew.ski/gg/cmd"
 )
 
 func main() {

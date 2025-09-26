@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/spf13/cobra"
-	"petezalew.ski/pit/model"
+	"petezalew.ski/gg/model"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "pit",
+	Use:   "gg",
 	Short: "Do what git does in Go",
 	Long:  "This is a toy version of git and a way to get familiar and comfortable with Go.",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringP("work-tree", "C", ".", "Run as if pit was started in this path instead of the current working directory.")
+	rootCmd.PersistentFlags().StringP("work-tree", "C", ".", "Run as if gg was started in this path instead of the current working directory.")
 
 	rootCmd.AddCommand(NewCatFileCmd())
 	rootCmd.AddCommand(NewInitCmd())
