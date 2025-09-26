@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
-	// "math"
 )
 
 // https://git-scm.com/docs/index-format

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"petezalew.ski/gg/model"
+	"petezalew.ski/gg/internal/model"
 )
 
 func NewCatFileCmd() *cobra.Command {

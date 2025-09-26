@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	ini "gopkg.in/ini.v1"
-	"petezalew.ski/gg/model"
+	"petezalew.ski/gg/internal/model"
 )
 
 var ErrGitExistsAndIsNotDir = errors.New(".git exists and is not a directory")

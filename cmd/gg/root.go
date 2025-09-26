@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/spf13/cobra"
-	"petezalew.ski/gg/model"
+	"petezalew.ski/gg/internal/model"
 )
 
 var rootCmd = &cobra.Command{

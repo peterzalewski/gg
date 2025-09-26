@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"petezalew.ski/gg/model"
+	"petezalew.ski/gg/internal/model"
 )
 
 func NewLSTreeCmd() *cobra.Command {
